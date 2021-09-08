@@ -291,5 +291,5 @@ func compareStrings(left, right string) bool {
 	right = strings.ToLower(right)
 	left = strings.ToLower(left)
 
-	return right > left
+	return left < right
 }
