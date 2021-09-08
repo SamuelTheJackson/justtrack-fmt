@@ -39,6 +39,7 @@ func addEmptyLineBeforeReturn(f *dst.FuncDecl) {
 		if !ok {
 			return true
 		}
+
 		if len(blkStm.List) == 0 {
 			return true
 		}

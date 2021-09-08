@@ -88,6 +88,8 @@ type TestStruct struct {
 	D      []JustAStruct
 }
 
+func H() {}
+
 func test(test string) {
 	if test == "" {
 		return
@@ -193,6 +195,8 @@ type TestStruct struct {
 	ThisIsUint    uint32
 	CreatedAt     time.Time
 }
+
+func H() {}
 
 func test(test string) {
 	if test == "" {
