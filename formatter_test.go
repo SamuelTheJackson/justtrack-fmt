@@ -1,11 +1,10 @@
-package justtrack_fmt_test
+package main
 
 import (
 	"bytes"
 	"strings"
 	"testing"
 
-	"github.com/SamuelTheJackson/justtrack-fmt"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -228,7 +227,7 @@ func Test_ProcessFile(t *testing.T) {
 	in := strings.NewReader(input)
 	var out bytes.Buffer
 
-	err := justtrack_fmt.FormatFile(in, &out)
+	err := FormatFile(in, &out)
 	assert.NoError(t, err)
 
 	assert.Equal(t, expectedOutput, out.String())

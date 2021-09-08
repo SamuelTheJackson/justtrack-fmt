@@ -6,8 +6,6 @@ import (
 	"go/scanner"
 	"os"
 	"strings"
-
-	"github.com/SamuelTheJackson/justtrack-fmt"
 )
 
 var (
@@ -72,7 +70,7 @@ func justtrackMain() {
 		in = f
 	}
 
-	if err := justtrack_fmt.FormatFile(in, os.Stdout); err != nil {
+	if err := FormatFile(in, os.Stdout); err != nil {
 		report(err)
 	}
 }

@@ -1,4 +1,4 @@
-package justtrack_fmt
+package main
 
 import (
 	"fmt"
