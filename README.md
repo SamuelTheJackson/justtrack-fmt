@@ -7,3 +7,5 @@ This formatter is doing the following things:
 
 ### installation
 `go install github.com/SamuelTheJackson/justtrack-fmt@latest`
+
+should run after `gofumpt`
