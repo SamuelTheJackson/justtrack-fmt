@@ -14,8 +14,8 @@ import (
 var (
 	exitCode = 0
 	gf       = flag.String("g", "", "set gofumpt binary path")
-	rFile    = flag.String("r", "", "read from file instead of stdin")
-	wFile    = flag.String("w", "", "write to file instead of stdout")
+	inFile   = flag.String("r", "", "read from file")
+	outFile  = flag.String("w", "", "write to file instead of stdout")
 )
 
 func report(err error) {
@@ -25,7 +25,7 @@ func report(err error) {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: justtrack-fmt [flags]\n")
+	fmt.Fprintf(os.Stderr, "usage: justtrack-fmt file [flags]\n")
 	flag.PrintDefaults()
 }
 
@@ -53,9 +53,11 @@ func justtrackMain() {
 	flag.Usage = usage
 	flag.Parse()
 
-	// default read from stdin
-	var in io.Reader
-	in = os.Stdin
+	if *inFile == "" {
+		report(fmt.Errorf("you have to speacify an input file (-f)"))
+
+		return
+	}
 
 	var out io.Writer
 
@@ -63,33 +65,32 @@ func justtrackMain() {
 	out = os.Stdout
 
 	// read from file
-	if *rFile != "" {
-		f, err := os.Open(*rFile)
-		if err != nil {
-			report(err)
+	inf, err := os.Open(*inFile)
+	if err != nil {
+		report(err)
 
-			return
-		}
-		defer f.Close()
+		return
+	}
+	defer inf.Close()
 
-		if !isValidFile(f) {
-			report(fmt.Errorf("%s not valid file", *rFile))
+	if !isValidFile(inf) {
+		report(fmt.Errorf("%s not valid file", *inFile))
 
-			return
-		}
-
-		in = f
+		return
 	}
 
+	var in io.Reader
+	in = inf
+
 	// write to file
-	if *wFile != "" {
-		f, err := os.OpenFile(*wFile, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if *outFile != "" {
+		outf, err := os.OpenFile(*outFile, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 		if err != nil {
 			report(err)
 
 			return
 		}
-		defer f.Close()
+		defer outf.Close()
 
 		var tmp bytes.Buffer
 
@@ -97,19 +98,19 @@ func justtrackMain() {
 
 		defer func() {
 			// delete content of file
-			if err = f.Truncate(0); err != nil {
+			if err = outf.Truncate(0); err != nil {
 				report(err)
 
 				return
 			}
 
-			if _, err = f.Seek(0, 0); err != nil {
+			if _, err = outf.Seek(0, 0); err != nil {
 				report(err)
 
 				return
 			}
 
-			if _, err := f.Write(tmp.Bytes()); err != nil {
+			if _, err := outf.Write(tmp.Bytes()); err != nil {
 				report(err)
 
 				return
@@ -118,20 +119,14 @@ func justtrackMain() {
 	}
 
 	if *gf != "" {
-		cmd := exec.Command(*gf, *rFile)
-		if *rFile == "" {
-			cmd.Stdin = in
-		}
-
-		out, err := cmd.Output()
+		outGf, err := exec.Command(*gf, *inFile).Output()
 		if err != nil {
 			report(err)
 
 			return
 		}
 
-		in = bytes.NewReader(out)
-
+		in = bytes.NewReader(outGf)
 	}
 
 	if err := FormatFile(in, out); err != nil {
