@@ -163,9 +163,7 @@ func FormatFile(in io.Reader, out io.Writer) error {
 
 			// sort interfaces
 			if i, ok := ts.Type.(*dst.InterfaceType); ok {
-				fmt.Println(i.Methods.List)
 				groupAndSortFieldList(i.Methods.List)
-				fmt.Println(i.Methods.List)
 
 				continue
 			}
