@@ -18,6 +18,7 @@ const (
 	EMBEDDEDS = iota
 	LOGGER
 	ID
+	FUNCS
 	STRUCTS
 	SCALARS
 	TIMESTAMPS
@@ -27,7 +28,7 @@ const (
 	idFieldName     = "Id"
 	loggerFieldName = "logger"
 	// number of different categories we have to sort inside of a struct.
-	structFieldCategoryCount = 6
+	structFieldCategoryCount = 7
 )
 
 var timestampNames = []string{"CreatedAt", "UpdatedAt"}
@@ -110,30 +111,30 @@ func FormatFile(in io.Reader, out io.Writer) error {
 			continue
 		}
 
-		str, ok := d.(*dst.GenDecl)
+		genDecl, ok := d.(*dst.GenDecl)
 		if !ok {
 			continue
 		}
 
 		// import statements
-		if str.Tok == token.IMPORT {
-			removeUnnecessaryImportNames(str)
+		if genDecl.Tok == token.IMPORT {
+			removeUnnecessaryImportNames(genDecl)
 
 			continue
 		}
 
 		// sort var blocks
-		if str.Tok == token.VAR {
-			sortSpecs(str.Specs)
+		if genDecl.Tok == token.VAR {
+			sortSpecs(genDecl.Specs)
 
 			continue
 		}
 
 		// sort const
 		// if iota ignore the block because we don't want to mess this up
-		if str.Tok == token.CONST {
+		if genDecl.Tok == token.CONST {
 			foundIota := false
-			for _, i := range str.Specs {
+			for _, i := range genDecl.Specs {
 				if v, ok := i.(*dst.ValueSpec); ok {
 					if len(v.Values) == 1 {
 						if i, ok := v.Values[0].(*dst.Ident); ok {
@@ -148,24 +149,33 @@ func FormatFile(in io.Reader, out io.Writer) error {
 			}
 
 			if !foundIota {
-				sortSpecs(str.Specs)
+				sortSpecs(genDecl.Specs)
 			}
 
 			continue
 		}
 
-		for _, s := range str.Specs {
-			dstS, ok := s.(*dst.TypeSpec)
+		for _, s := range genDecl.Specs {
+			ts, ok := s.(*dst.TypeSpec)
 			if !ok {
 				continue
 			}
 
-			l, ok := dstS.Type.(*dst.StructType)
+			// sort interfaces
+			if i, ok := ts.Type.(*dst.InterfaceType); ok {
+				fmt.Println(i.Methods.List)
+				groupAndSortFieldList(i.Methods.List)
+				fmt.Println(i.Methods.List)
+
+				continue
+			}
+
+			s, ok := ts.Type.(*dst.StructType)
 			if !ok {
 				continue
 			}
 
-			groupAndSortFieldList(l.Fields.List)
+			groupAndSortFieldList(s.Fields.List)
 		}
 
 		if err != nil {
@@ -231,6 +241,12 @@ func groupAndSortFieldList(l []*dst.Field) {
 		// timestamps
 		if funk.ContainsString(timestampNames, i.Names[0].Name) {
 			fieldList[TIMESTAMPS] = append(fieldList[TIMESTAMPS], i)
+
+			continue
+		}
+
+		if _, ok := i.Type.(*dst.FuncType); ok {
+			fieldList[FUNCS] = append(fieldList[FUNCS], i)
 
 			continue
 		}

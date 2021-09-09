@@ -42,11 +42,13 @@ var (
 )
 
 type Dog interface {
+	Bite(times int) error
 	Bark(times int) error
 }
 
 type Fog2 interface {
-	Bark(times int) error
+	Dog
+	Fogging(times int) error
 }
 
 type Cat struct {
@@ -151,10 +153,12 @@ var (
 
 type Dog interface {
 	Bark(times int) error
+	Bite(times int) error
 }
 
 type Fog2 interface {
-	Bark(times int) error
+	Dog
+	Fogging(times int) error
 }
 
 type Cat struct {
