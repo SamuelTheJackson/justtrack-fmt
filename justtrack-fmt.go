@@ -7,11 +7,13 @@ import (
 	"go/scanner"
 	"io"
 	"os"
+	"os/exec"
 	"strings"
 )
 
 var (
 	exitCode = 0
+	gf       = flag.String("g", "", "set gofumpt binary path")
 	rFile    = flag.String("r", "", "read from file instead of stdin")
 	wFile    = flag.String("w", "", "write to file instead of stdout")
 )
@@ -52,7 +54,8 @@ func justtrackMain() {
 	flag.Parse()
 
 	// default read from stdin
-	in := os.Stdin
+	var in io.Reader
+	in = os.Stdin
 
 	var out io.Writer
 
@@ -112,6 +115,23 @@ func justtrackMain() {
 				return
 			}
 		}()
+	}
+
+	if *gf != "" {
+		cmd := exec.Command(*gf, *rFile)
+		if *rFile == "" {
+			cmd.Stdin = in
+		}
+
+		out, err := cmd.Output()
+		if err != nil {
+			report(err)
+
+			return
+		}
+
+		in = bytes.NewReader(out)
+
 	}
 
 	if err := FormatFile(in, out); err != nil {
