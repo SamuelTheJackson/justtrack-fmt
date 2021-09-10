@@ -53,34 +53,31 @@ func justtrackMain() {
 	flag.Usage = usage
 	flag.Parse()
 
-	if *inFile == "" {
-		report(fmt.Errorf("you have to speacify an input file (-f)"))
-
-		return
-	}
-
 	var out io.Writer
 
 	// default write to stdout
 	out = os.Stdout
 
-	// read from file
-	inf, err := os.Open(*inFile)
-	if err != nil {
-		report(err)
-
-		return
-	}
-	defer inf.Close()
-
-	if !isValidFile(inf) {
-		report(fmt.Errorf("%s not valid file", *inFile))
-
-		return
-	}
-
 	var in io.Reader
-	in = inf
+
+	if *inFile != "" {
+		// read from file
+		inf, err := os.Open(*inFile)
+		if err != nil {
+			report(err)
+
+			return
+		}
+		defer inf.Close()
+
+		if !isValidFile(inf) {
+			report(fmt.Errorf("%s not valid file", *inFile))
+
+			return
+		}
+
+		in = inf
+	}
 
 	// write to file
 	if *outFile != "" {
