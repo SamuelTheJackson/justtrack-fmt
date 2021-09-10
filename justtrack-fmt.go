@@ -25,7 +25,7 @@ func report(err error) {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: justtrack-fmt file [flags]\n")
+	fmt.Fprintf(os.Stderr, "usage: justtrack-fmt file [flags]\n version 0.0.1")
 	flag.PrintDefaults()
 }
 
