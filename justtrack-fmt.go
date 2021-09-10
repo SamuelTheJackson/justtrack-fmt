@@ -60,6 +60,9 @@ func justtrackMain() {
 
 	var in io.Reader
 
+	// default read from stdin
+	in = os.Stdin
+
 	if *inFile != "" {
 		// read from file
 		inf, err := os.Open(*inFile)
