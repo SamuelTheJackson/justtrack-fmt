@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const version = "0.0.1"
+
 var (
 	exitCode = 0
 	gf       = flag.String("g", "", "set gofumpt binary path")
@@ -25,7 +27,7 @@ func report(err error) {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, "usage: justtrack-fmt file [flags]\n version: 0.0.1\n")
+	fmt.Fprintf(os.Stderr, "usage: justtrack-fmt file [flags]\n version: %s\n", version)
 	flag.PrintDefaults()
 }
 
@@ -45,7 +47,6 @@ func isValidFile(f *os.File) bool {
 
 func main() {
 	justtrackMain()
-
 	os.Exit(exitCode)
 }
 
@@ -63,8 +64,8 @@ func justtrackMain() {
 	// default read from stdin
 	in = os.Stdin
 
+	// read from file
 	if *inFile != "" {
-		// read from file
 		inf, err := os.Open(*inFile)
 		if err != nil {
 			report(err)
@@ -110,6 +111,7 @@ func justtrackMain() {
 				return
 			}
 
+			// write buffer to output file
 			if _, err := outf.Write(tmp.Bytes()); err != nil {
 				report(err)
 
@@ -118,7 +120,16 @@ func justtrackMain() {
 		}()
 	}
 
+	// execute gofumpt
+	// use output from gofumpt as input
+	// if you want to use gofumpt you have to specify an input file
 	if *gf != "" {
+		if *inFile == "" {
+			report(fmt.Errorf("if you specify a gofumpt binary you have to specify an input file. Reading from stdin is not supported"))
+
+			return
+		}
+
 		outGf, err := exec.Command(*gf, *inFile).Output()
 		if err != nil {
 			report(err)

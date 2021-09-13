@@ -175,10 +175,6 @@ func FormatFile(in io.Reader, out io.Writer) error {
 
 			groupAndSortFieldList(s.Fields.List)
 		}
-
-		if err != nil {
-			return err
-		}
 	}
 
 	if err := decorator.Fprint(out, f); err != nil {
@@ -243,6 +239,7 @@ func groupAndSortFieldList(l []*dst.Field) {
 			continue
 		}
 
+		// functions
 		if _, ok := i.Type.(*dst.FuncType); ok {
 			fieldList[FUNCS] = append(fieldList[FUNCS], i)
 
@@ -251,8 +248,7 @@ func groupAndSortFieldList(l []*dst.Field) {
 
 		// scalar pointer
 		if s, ok := i.Type.(*dst.StarExpr); ok {
-			f, ok := s.X.(*dst.Ident)
-			if ok {
+			if f, ok := s.X.(*dst.Ident); ok {
 				if f.Obj == nil {
 					fieldList[SCALARS] = append(fieldList[SCALARS], i)
 
@@ -261,7 +257,7 @@ func groupAndSortFieldList(l []*dst.Field) {
 			}
 		}
 
-		// scalars
+		// scalar
 		if is, ok := i.Type.(*dst.Ident); ok {
 			if is.Obj == nil {
 				fieldList[SCALARS] = append(fieldList[SCALARS], i)
@@ -270,11 +266,13 @@ func groupAndSortFieldList(l []*dst.Field) {
 			}
 		}
 
+		// struct types left
 		fieldList[STRUCTS] = append(fieldList[STRUCTS], i)
 	}
 
 	counter := 0
 
+	// sort all types and copyt them back
 	for _, r := range fieldList {
 		if len(r) == 0 {
 			continue
