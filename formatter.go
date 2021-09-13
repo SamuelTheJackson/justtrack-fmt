@@ -249,6 +249,18 @@ func groupAndSortFieldList(l []*dst.Field) {
 			continue
 		}
 
+		// scalar pointer
+		if s, ok := i.Type.(*dst.StarExpr); ok {
+			f, ok := s.X.(*dst.Ident)
+			if ok {
+				if f.Obj == nil {
+					fieldList[SCALARS] = append(fieldList[SCALARS], i)
+
+					continue
+				}
+			}
+		}
+
 		// scalars
 		if is, ok := i.Type.(*dst.Ident); ok {
 			if is.Obj == nil {

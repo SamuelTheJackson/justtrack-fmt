@@ -80,12 +80,15 @@ type TestStruct struct {
 		CreatedAt time.Time
 	}
 	b uint32
+	ThisIsStruct3 *JustAStruct
 	// commentForStruct2
 	ThisIsStruct2 JustAStruct
 	C             JustAStruct
 	// this is a comment for
 	// the logger
 	logger log.Logger
+	Qual   *string
+	Stal   *string
 	a      string
 	D      []JustAStruct
 }
@@ -193,8 +196,11 @@ type TestStruct struct {
 	ThisIsStruct time.Time
 	// commentForStruct2
 	ThisIsStruct2 JustAStruct
+	ThisIsStruct3 *JustAStruct
 	a             string
 	b             uint32
+	Qual          *string
+	Stal          *string
 	ThisIsString  string
 	ThisIsUint    uint32
 	CreatedAt     time.Time
