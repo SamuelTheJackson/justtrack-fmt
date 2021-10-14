@@ -210,9 +210,6 @@ func groupAndSortFieldList(l []*dst.Field) {
 		if s, ok := i.Type.(*dst.StructType); ok {
 			groupAndSortFieldList(s.Fields.List)
 		}
-		if len(i.Names) > 0 && i.Names[0].Name == "producer" {
-			fmt.Println(i.Names)
-		}
 
 		// embeddeds don't have names
 		if len(i.Names) == 0 {
