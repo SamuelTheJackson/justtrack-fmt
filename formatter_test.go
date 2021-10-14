@@ -55,7 +55,10 @@ type Cat struct {
 	CreatedAt    time.Time
 	Id           uint
 	thisIsUint   uint32
+	producer     Dog
 	ThisIsStruct TestStruct
+	Test         Dog
+	Alone        chan int
 }
 
 type JustAStruct struct{}
@@ -166,6 +169,9 @@ type Fog2 interface {
 
 type Cat struct {
 	Id           uint
+	Alone        chan int
+	producer     Dog
+	Test         Dog
 	ThisIsStruct TestStruct
 	thisIsUint   uint32
 	CreatedAt    time.Time
@@ -181,11 +187,15 @@ type TestStruct struct {
 	logger     log.Logger
 	Id         uint
 	A          JustAStruct
+	a          string
 	B          JustAStruct
+	b          uint32
 	c          []byte
 	C          JustAStruct
 	D          []JustAStruct
+	Qual       *string
 	repo       test_package.TestStruct
+	Stal       *string
 	TestStruct struct {
 		// this is the Id
 		// pls keep it to this line
@@ -193,15 +203,11 @@ type TestStruct struct {
 		Test      string
 		CreatedAt time.Time
 	}
+	ThisIsString string
 	ThisIsStruct time.Time
 	// commentForStruct2
 	ThisIsStruct2 JustAStruct
 	ThisIsStruct3 *JustAStruct
-	a             string
-	b             uint32
-	Qual          *string
-	Stal          *string
-	ThisIsString  string
 	ThisIsUint    uint32
 	CreatedAt     time.Time
 }

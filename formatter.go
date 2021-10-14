@@ -199,97 +199,75 @@ func groupAndSortFieldList(l []*dst.Field) {
 		return
 	}
 
-	fieldList := make([][]*dst.Field, structFieldCategoryCount)
-
-	for i := range fieldList {
-		fieldList[i] = make([]*dst.Field, 0)
-	}
+	embeddeds := make([]*dst.Field, 0)
+	id := make([]*dst.Field, 0)
+	logger := make([]*dst.Field, 0)
+	timestamps := make([]*dst.Field, 0)
+	rest := make([]*dst.Field, 0)
 
 	for _, i := range l {
 		// nested struct
 		if s, ok := i.Type.(*dst.StructType); ok {
 			groupAndSortFieldList(s.Fields.List)
 		}
+		if len(i.Names) > 0 && i.Names[0].Name == "producer" {
+			fmt.Println(i.Names)
+		}
 
 		// embeddeds don't have names
 		if len(i.Names) == 0 {
-			fieldList[EMBEDDEDS] = append(fieldList[EMBEDDEDS], i)
+			embeddeds = append(embeddeds, i)
 
 			continue
 		}
 
 		// identifier of the struct
 		if i.Names[0].Name == idFieldName {
-			fieldList[ID] = append(fieldList[ID], i)
+			id = append(id, i)
 
 			continue
 		}
 
 		// logger
 		if i.Names[0].Name == loggerFieldName {
-			fieldList[LOGGER] = append(fieldList[LOGGER], i)
+			logger = append(logger, i)
 
 			continue
 		}
 
 		// timestamps
 		if funk.ContainsString(timestampNames, i.Names[0].Name) {
-			fieldList[TIMESTAMPS] = append(fieldList[TIMESTAMPS], i)
+			timestamps = append(timestamps, i)
 
 			continue
 		}
 
-		// functions
-		if _, ok := i.Type.(*dst.FuncType); ok {
-			fieldList[FUNCS] = append(fieldList[FUNCS], i)
-
-			continue
-		}
-
-		// scalar pointer
-		if s, ok := i.Type.(*dst.StarExpr); ok {
-			if f, ok := s.X.(*dst.Ident); ok {
-				if f.Obj == nil {
-					fieldList[SCALARS] = append(fieldList[SCALARS], i)
-
-					continue
-				}
-			}
-		}
-
-		// scalar
-		if is, ok := i.Type.(*dst.Ident); ok {
-			if is.Obj == nil {
-				fieldList[SCALARS] = append(fieldList[SCALARS], i)
-
-				continue
-			}
-		}
-
-		// struct types left
-		fieldList[STRUCTS] = append(fieldList[STRUCTS], i)
+		rest = append(rest, i)
 	}
 
-	counter := 0
+	sortStructFieldsByName(id)
+	sortStructFieldsByName(embeddeds)
+	sortStructFieldsByName(logger)
+	sortStructFieldsByName(timestamps)
+	sortStructFieldsByName(rest)
 
-	// sort all types and copyt them back
-	for _, r := range fieldList {
-		if len(r) == 0 {
-			continue
-		}
+	merged := make([]*dst.Field, 0)
+	merged = append(merged, embeddeds...)
+	merged = append(merged, logger...)
+	merged = append(merged, id...)
+	merged = append(merged, rest...)
+	merged = append(merged, timestamps...)
 
-		sortStructFieldsByName(r)
-
-		from := counter
-		to := from + len(r)
-
-		copy(l[from:to], r)
-
-		counter += len(r)
+	for i := range merged {
+		l[i] = merged[i]
 	}
 }
 
 func sortStructFieldsByName(list []*dst.Field) {
+	if len(list) < 2 {
+		return
+	}
+
 	sort.Slice(list, func(i, j int) bool {
 		var right, left string
 
