@@ -123,6 +123,8 @@ func justtrackMain() {
 	// execute gofumpt
 	// use output from gofumpt as input
 	// if you want to use gofumpt you have to specify an input file
+
+	oriOut := []byte{}
 	if *gf != "" {
 		if *inFile == "" {
 			report(fmt.Errorf("if you specify a gofumpt binary you have to specify an input file. Reading from stdin is not supported"))
@@ -137,10 +139,14 @@ func justtrackMain() {
 			return
 		}
 
+		oriOut = outGf
 		in = bytes.NewReader(outGf)
 	}
 
 	if err := FormatFile(in, out); err != nil {
+		if _, err := out.Write(oriOut); err != nil {
+			report(err)
+		}
 		report(err)
 	}
 }
