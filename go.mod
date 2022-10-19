@@ -1,4 +1,4 @@
-module justtrack-fmt
+module github.com/SamuelTheJackson/justtrack-fmt
 
 go 1.18
 
