@@ -30,7 +30,6 @@ var (
 )
 
 func main() {
-	log.SetLevel(log.DebugLevel)
 	kingpin.Parse()
 
 	err := run()
@@ -42,7 +41,6 @@ func main() {
 }
 
 func run() error {
-
 	config := JustTrackFmtConfig{
 		BaseFormatterCmd: *baseFormatterCmd,
 	}
